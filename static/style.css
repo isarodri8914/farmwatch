@@ -1,0 +1,681 @@
+:root {
+    --bg-color: #f4f7fa;
+    --sidebar-bg: #004d40;
+    --primary: #00bfa5;
+    --text-dark: #222;
+    --card-bg: #fff;
+    --shadow: 0 4px 10px rgba(0,0,0,0.1);
+    --danger: #e53935;
+    --warning: #ffb300;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    margin: 0;
+    background-color: var(--bg-color);
+    color: var(--text-dark);
+}
+
+/* Base Layout */
+.layout {
+    display: flex;
+    min-height: 100vh;
+}
+
+/* === SIDEBAR MEJORADA === */
+/* ... (El CSS del Sidebar permanece igual) ... */
+.sidebar {
+
+
+    width: 250px;
+    background: linear-gradient(180deg, #003d33, #004d40);
+    color: white;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease-in-out;
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 10;
+    box-shadow: 4px 0 10px rgba(0,0,0,0.3);
+}
+
+.logo-section {
+    text-align: center;
+    padding: 25px 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.logo {
+    width: 80px;
+    border-radius: 50%;
+    box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.logo-section h2 {
+    margin: 10px 0 0;
+    font-size: 1.3rem;
+    font-weight: 600;
+}
+
+.logo-section .tagline {
+    font-size: 0.8rem;
+    color: #a7ffeb;
+}
+
+.sidebar nav ul {
+    list-style: none;
+    padding: 0;
+    margin-top: 20px;
+}
+
+.sidebar nav ul li {
+    margin: 8px 0;
+}
+
+.sidebar nav ul li a {
+    display: block;
+    padding: 12px 20px;
+    color: white;
+    text-decoration: none;
+    border-left: 3px solid transparent;
+    transition: 0.3s;
+}
+
+.sidebar nav ul li a:hover,
+.sidebar nav ul li a.active {
+    background: rgba(0, 191, 165, 0.2);
+    border-left: 3px solid var(--primary);
+    color: var(--primary);
+}
+
+.sidebar footer {
+    text-align: center;
+    padding: 15px;
+    font-size: 0.8rem;
+    opacity: 0.7;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+/* === CONTENIDO PRINCIPAL === */
+.content {
+    flex-grow: 1;
+    padding: 40px;
+    margin-left: 250px; /* espacio para el sidebar */
+    transition: margin-left 0.3s ease;
+}
+.topbar {
+    margin-bottom: 20px;
+}
+.subtitle {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+
+/* --- Encabezado Móvil --- */
+.mobile-header {
+    display: none; /* Oculto por defecto en escritorio */
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 50px;
+    padding: 0 15px;
+    background: #004d40; /* Color de tu menú */
+    color: white;
+    align-items: center;
+    z-index: 11; /* El más alto, para que siempre sea accesible */
+}
+.mobile-header h1 {
+    font-size: 1.5rem;
+    margin: 0;
+    padding-left: 20px;
+}
+.menu-toggle {
+    font-size: 2rem;
+    cursor: pointer;
+}
+
+/* Indicators */
+.indicators {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+}
+
+.indicator {
+    flex: 1 1 200px; /* Ligeramente más pequeño para mejor ajuste */
+    background: var(--card-bg);
+    border-radius: 14px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: var(--shadow);
+    transition: transform 0.3s, box-shadow 0.3s;
+}
+
+.indicator:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.15);
+}
+
+.indicator p {
+    font-size: 1.8rem; /* Ligeramente más pequeño */
+    margin: 5px 0 0;
+    font-weight: 600;
+    color: var(--sidebar-bg);
+}
+.indicator .small {
+    font-size: 0.8rem;
+    color: #666;
+    margin: 0;
+}
+
+/* Estado vaca */
+.estado-vaca {
+    background: var(--card-bg);
+    margin-top: 20px;
+    padding: 20px;
+    border-radius: 14px;
+    text-align: center;
+    font-size: 1.2rem;
+    box-shadow: var(--shadow);
+    color: var(--text-dark);
+}
+.mt-30 { margin-top: 30px; }
+
+/* Charts */
+.charts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 20px;
+}
+
+.chart-card {
+    flex: 1 1 450px;
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+.chart-card h4 {
+    margin-top: 0;
+    color: #444;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+/* Map */
+#map {
+    height: 400px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+}
+
+/* Alerts */
+#alert-list {
+    background: var(--card-bg);
+    padding: 20px;
+    border-radius: 14px;
+    box-shadow: var(--shadow);
+    list-style: none;
+    max-height: 300px; /* Aumentado para mejor visualización */
+    overflow-y: auto;
+    margin: 0;
+}
+#alert-list li {
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+    font-size: 0.95rem;
+}
+#alert-list li:last-child {
+    border-bottom: none;
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Botones */
+button {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 600;
+    transition: background-color 0.3s;
+}
+
+.btn-primary {
+    background-color: var(--primary);
+    color: white;
+}
+.btn-primary:hover {
+    background-color: #00a08c;
+}
+
+.btn-secondary {
+    background-color: #e0e0e0;
+    color: var(--text-dark);
+}
+.btn-secondary:hover {
+    background-color: #ccc;
+}
+
+
+/* ==================================== */
+/*       Estilos de Administrador       */
+/* ==================================== */
+
+.admin-controls { 
+    display:flex; 
+    gap:15px; 
+    flex-wrap:wrap; 
+    align-items:center; 
+    margin-bottom:20px; 
+    padding:15px;
+    background:var(--card-bg);
+    border-radius:10px;
+    box-shadow: var(--shadow);
+}
+
+.group-input { 
+    display:flex; 
+    gap:5px; 
+    align-items:flex-start; 
+    flex-direction: column;
+}
+
+.group-input label {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #555;
+}
+
+.group-input input, .group-input select {
+    padding: 8px 10px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    background: #fcfcfc;
+}
+
+.controls-right { 
+    margin-left:auto; 
+    display:flex; 
+    gap:10px; 
+    align-items:center; 
+}
+
+.admin-meta { 
+    display:flex; 
+    gap:20px; 
+    flex-wrap:wrap; 
+    margin-bottom:20px; 
+}
+
+.admin-card { 
+    background:var(--card-bg); 
+    border-radius:10px; 
+    padding:15px; 
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08); 
+    flex: 1 1 200px;
+}
+.admin-card:last-child {
+    flex-grow: 0; /* Para que los detalles de la vaca no crezcan indefinidamente */
+}
+
+.warning-card {
+    border-left: 5px solid var(--danger);
+}
+.big-number {
+    font-size: 2.2rem;
+    font-weight: 700;
+    margin-top: 5px;
+    color: var(--sidebar-bg);
+}
+
+/* Tablas */
+.table { 
+    width:100%; 
+    border-collapse:collapse; 
+}
+.table th, .table td { 
+    padding:10px 8px; 
+    border-bottom:1px solid #e6e6e6; 
+    font-size:12px; 
+    text-align: left;
+}
+.table thead th { 
+    background:#f0f0f0; 
+    text-align:left; 
+    font-weight: 700;
+    color: #444;
+}
+.table tbody tr:hover {
+    background-color: #f7f7f7;
+    cursor: pointer;
+}
+.table-wrap { 
+    overflow-x: auto; 
+    max-height:400px; /* Ligeramente más alto */
+}
+
+/* Paginación */
+.pagination { 
+    display:flex; 
+    gap:6px; 
+    align-items:center; 
+    margin-top:10px; 
+    justify-content: flex-end;
+}
+.page-btn { 
+    padding:6px 10px; 
+    border-radius:6px; 
+    background:#e0e0e0; 
+    cursor:pointer;
+    font-size: 0.8rem;
+}
+.page-btn:hover {
+    background: #d4d4d4;
+}
+.page-btn.active { 
+    background:var(--primary); 
+    font-weight:600; 
+    color: white;
+}
+
+/* Map Admin */
+#map-admin { 
+    height:250px; 
+    border-radius:8px; 
+    overflow:hidden; 
+    box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* Grid Layout Admin */
+.charts-admin-wrap {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.admin-chart-panel {
+    flex: 1 1 45%;
+    
+}
+
+.admin-data-wrap {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+}
+.admin-table-panel {
+    flex: 1 1 55%;
+    min-width: 500px;
+}
+.admin-map-details-wrap {
+    flex: 1 1 350px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+/* --- Capa de Oscurecimiento (Overlay) --- */
+.overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.5);
+    z-index: 9; /* Menor que el sidebar (10) pero mayor que el contenido */
+    display: none; /* Inicia oculto */
+    transition: opacity 0.3s ease-in-out;
+    opacity: 0;
+}
+.overlay.active {
+    display: block; /* Se muestra cuando está activo */
+    opacity: 1;
+}
+
+/* ============================================================
+   FIX DEFINITIVO PARA QUE LAS GRÁFICAS DE CHART.JS NO CREZCAN
+   ============================================================ */
+
+/* El contenedor de cada gráfica: fija el alto */
+.chart-card {
+    height: 260px !important;
+    position: relative !important;
+    overflow: hidden !important;
+}
+
+/* Controlar directamente TODOS los canvas */
+canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 220px !important;
+    max-height: 220px !important;
+    display: block !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* Evitar que el layout entero se mueva */
+body, html {
+    overflow-x: hidden !important;
+}
+
+#map, #map-admin {
+    width: 100%;
+    height: 300px;     /* o más, pero NO 0 */
+    min-height: 300px;
+}
+
+
+/* ===== FIX FINAL PARA TODAS LAS GRÁFICAS ===== */
+.chart-card canvas,
+.admin-chart-panel canvas {
+    width: 100% !important;
+    max-width: 100% !important;
+    height: 200px !important;
+    max-height: 200px !important;
+}
+
+
+
+/* === RESPONSIVE === */
+@media (max-width: 1100px) {
+    .admin-controls {
+        justify-content: flex-start;
+    }
+    .controls-right {
+        margin-left: 0;
+    }
+}
+/* === RESPONSIVE === */
+@media (max-width: 900px) {
+    /* Sidebar oculto correctamente en móvil */
+    .sidebar {
+        position: fixed;
+        left: -260px;
+        top: 0;
+        height: 100%;
+        width: 260px;
+        transition: left 0.3s ease;
+    }
+
+    .sidebar.active {
+        left: 0;
+    }
+
+    /* Quita cualquier desplazamiento lateral causado por sidebar */
+    .content {
+        margin: 0 !important;
+        padding: 15px !important; /* Ligeramente más padding para mejor estética */
+        width: 100% !important;
+        box-sizing: border-box !important;
+        padding-top: 65px !important; /* Espacio para el header fijo */
+    }
+
+    /* Evita que haya un espacio invisible afectando el layout */
+    body, html {
+        overflow-x: hidden !important;
+    }
+
+    .mobile-header {
+        display: flex;
+        justify-content: space-between; /* Alinea el menú a la izquierda y el título al centro */
+        align-items: center;
+    }
+
+    /* --- Indicadores (Inicio) --- */
+    .indicators {
+        grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); /* Min-width ajustado */
+        gap: 15px;
+        display: grid;
+    }
+
+    /* --- GRÁFICAS (Inicio) --- */
+    .charts {
+        flex-direction: column; /* Apilamiento vertical */
+        gap: 15px; /* Separación consistente */
+    }
+    .chart-card {
+        flex: none !important;
+        width: 100% !important;
+        min-width: 100% !important;
+        box-sizing: border-box;
+    }
+
+    /* ==================================== */
+    /*      AJUSTES DEL PANEL ADMINISTRADOR     */
+    /* ==================================== */
+
+    /* --- Tarjetas Superiores (admin-meta) --- */
+    .admin-meta {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .admin-card {
+        flex: 1 1 45%; /* Permite que crezcan un poco */
+    }
+
+    /* --- Controles de Filtros (admin-controls) --- */
+    .admin-controls {
+        display: flex;
+        flex-direction: column; /* Apila verticalmente */
+        align-items: stretch; /* Estira los elementos de filtro */
+        gap: 15px;
+    }
+    .group-input {
+        width: 100%; /* El input y select ocupan todo el ancho */
+        max-width: 100%;
+    }
+    .group-input input, .group-input select {
+        width: 100%; /* Asegura que los campos de formulario se estiren */
+        box-sizing: border-box;
+    }
+    .controls-right {
+        margin-left: 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+    .controls-right button {
+        flex-basis: calc(50% - 5px);
+        min-width: 120px;
+        flex-grow: 1;
+    }
+
+    /* --- Gráficas, Tabla y Detalles (Apilado vertical y ancho completo) --- */
+    .charts-admin-wrap {
+        flex-direction: column;
+        gap: 15px;
+    }
+    .admin-data-wrap {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .admin-chart-panel,
+    .admin-table-panel,
+    .admin-map-details-wrap {
+        width: 100% !important;
+        min-width: 100% !important;
+        flex: none !important;
+        margin-bottom: 0px;
+        box-sizing: border-box;
+    }
+
+    /* Altura y ancho consistente para elementos de visualización */
+    .chart-card canvas,
+    .admin-chart-panel canvas {
+        height: 200px !important;
+        max-height: 200px !important;
+    }
+
+    #map,
+    #map-admin {
+        height: 300px !important;
+        min-height: 300px !important;
+    }
+
+    .table-wrap {
+        overflow-x: auto;
+    }
+}
+
+/* ==============================
+   RESPONSIVE — PANTALLAS DE CELULAR (768px y menos)
+   ============================== */
+
+@media (max-width: 768px) {
+
+    .admin-meta {
+        grid-template-columns: 1fr; /* Una columna para las tarjetas principales */
+        gap: 12px;
+    }
+
+    .admin-card {
+        flex: none !important;
+        width: 100% !important;
+    }
+
+    .controls-right {
+        flex-direction: column;
+    }
+
+    .controls-right button {
+        width: 100%;
+        flex-basis: auto;
+    }
+    
+    /* Para asegurar que la tabla no se rompa */
+    table.table {
+        min-width: 600px; /* Un poco más de espacio si se necesita scroll horizontal */
+    }
+
+    .table-wrap {
+        /* Fuerza un scroll horizontal en la tabla para que no rompa el layout */
+        overflow-x: auto !important;
+    }
+}
+
+
+@media (max-width: 480px) {
+    .chart-card canvas,
+    .admin-chart-panel canvas {
+        height: 160px !important; /* Aumento la altura para que no sea tan pequeña */
+        max-height: 160px !important;
+    }
+    #map, #map-admin {
+        height: 250px !important;
+        min-height: 250px !important;
+    }
+}

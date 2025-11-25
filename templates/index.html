@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FarmWatch - Monitoreo Inteligente de Vacas</title>
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap">
+
+<link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+</head>
+
+<body>
+<header class="mobile-header">
+    <div class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">☰</div> 
+    <h1>FarmWatch</h1>
+</header>
+
+<div class="layout">
+    <aside class="sidebar" id="sidebar"> 
+       
+        <div class="logo-section">
+            <img src="{{ url_for('static', filename='logo.png') }}" alt="FarmWatch Logo" class="logo">
+            <h2>FarmWatch</h2>
+            <p class="tagline">Dispositivo de Monitoreo para Vacas</p>
+        </div>
+        <nav>
+            <ul>
+                <li><a href="#inicio" class="active">🏠 Inicio</a></li>
+                <li><a href="#graficas">📊 Gráficas</a></li>
+                <li><a href="#mapa">🗺️ GPS</a></li>
+                <li><a href="#alertas">⚠️ Alertas</a></li>
+                <li><a href="#config">⚙️ Configuración</a></li>
+                <li><a href="#admin-panel">🧑‍💼 Administrador</a></li>
+            </ul>
+        </nav>
+        <footer>
+            <p>© 2025 FarmWatch</p>
+        </footer>
+    </aside>
+
+    <main class="content">
+        <header class="topbar">
+            <h1>Panel de Monitoreo</h1>
+            <p class="subtitle">Vigilancia en tiempo real del ganado</p>
+        </header>
+
+        <section id="inicio" class="section">
+            <div class="indicators">
+                <div class="indicator">
+                    <h3>🌡 Temp. Ambiente</h3>
+                    <p id="temp-ambiente">-- °C</p>
+                </div>
+                <div class="indicator">
+                    <h3>🔥 Temp. Objeto</h3>
+                    <p id="temp-objeto">-- °C</p>
+                </div>
+                <div class="indicator">
+                    <h3>❤️ Ritmo Cardíaco</h3>
+                    <p id="ritmo">-- BPM</p>
+                </div>
+                <div class="indicator">
+                    <h3>🩸 Oxígeno</h3>
+                    <p id="oxigeno">-- %</p>
+                </div>
+                <div class="indicator">
+                    <h3>🧭 Orientación</h3>
+                    <p class="small">Giroscopio (X/Y/Z)</p>
+                    <p id="gyro">-- / -- / --</p>
+                </div>
+                <div class="indicator">
+                    <h3>🛰 Satélites</h3>
+                    <p id="sat">--</p>
+                </div>
+            </div>
+            <div class="estado-vaca mt-30" id="estado-movimiento"> 
+                <h3>🐄 Movimiento</h3>
+                <p><b>Movimiento:</b> <span id="movement-value">Analizando...</span></p>
+            </div>
+            <div class="estado-vaca" id="estado-general"> 
+                <h3>🐄 Estado General</h3>
+                <p id="estado-text">Analizando...</p>
+            </div>
+        </section>
+
+        <section id="graficas" class="section hidden">
+            <h2>📈 Historial de datos Reciente</h2>
+            <div class="charts">
+                <div class="chart-card">
+                    <h4>Temperatura Corporal (°C)</h4>
+                    <canvas id="tempChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <h4>Ritmo Cardíaco (BPM)</h4>
+                    <canvas id="heartChart"></canvas>
+                </div>
+            </div>
+        </section>
+
+        <section id="mapa" class="section hidden">
+            <h2>🗺️ Ubicación en tiempo real</h2>
+            <div id="map" style="height:420px;"></div>
+        </section>
+
+        <section id="alertas" class="section hidden">
+            <h2>⚠️ Alertas Recientes</h2>
+            <ul id="alert-list">
+                </ul>
+        </section>
+
+        <section id="config" class="section hidden">
+            <h2>⚙️ Configuración</h2>
+            <p>Personaliza los rangos de alerta y notificaciones según tus parámetros del hato.</p>
+            </section>
+
+        <section id="admin-panel" class="section hidden" class="dashboard-section">
+            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; margin-bottom:14px;">
+                <h2>🧑‍💼 Panel Administrador</h2>
+            </div>
+
+            <div class="admin-meta">
+                <div class="admin-card">
+                    <strong>🐄 Vacas monitoreadas</strong>
+                    <div id="admin-count-vacas" class="big-number">--</div>
+                </div>
+                <div class="admin-card">
+                    <strong>📦 Registros actuales</strong>
+                    <div id="admin-count-registros" class="big-number">--</div>
+                </div>
+                <div class="admin-card">
+                    <strong>📡 Última actualización</strong>
+                    <div id="admin-latest" class="small">--</div>
+                </div>
+                <div class="admin-card warning-card">
+                    <strong>⚠️ Alertas (Temp. alta)</strong>
+                    <div id="admin-alertas" class="big-number">--</div>
+                </div>
+            </div>
+
+            <div class="admin-controls">
+                <div class="group-input">
+                    <label for="filter-from">Desde</label>
+                    <input id="filter-from" type="datetime-local" />
+                </div>
+                <div class="group-input">
+                    <label for="filter-to">Hasta</label>
+                    <input id="filter-to" type="datetime-local" />
+                </div>
+                <div class="group-input">
+                    <label for="filter-vaca">Vaca</label>
+                    <select id="filter-vaca">
+                        <option value="">(todas)</option>
+                    </select>
+                </div>
+                <div class="group-input">
+                    <label for="filter-text">Buscar</label>
+                    <input id="filter-text" placeholder="id_vaca, valor..." />
+                </div>
+
+                <div class="controls-right">
+                    <button id="btn-refresh" class="btn-primary">🔄 Refrescar</button>
+                    <button id="btn-export" class="btn-secondary">⬇️ Exportar CSV</button>
+                    <button id="btn-clear" class="btn-secondary">Limpiar filtros</button>
+                </div>
+            </div>
+
+            <div class="charts-admin-wrap">
+                <div class="chart-card admin-chart-panel">
+                    <h4>Gráfica Temperatura (Selecciona Vaca)</h4>
+                    <canvas id="adminTempChart"></canvas>
+                </div>
+                <div class="chart-card admin-chart-panel">
+                    <h4>Gráfica Ritmo Cardíaco (Selecciona Vaca)</h4>
+                    <canvas id="adminHeartChart"></canvas>
+                </div>
+            </div>
+
+            <div class="admin-data-wrap">
+                <div class="admin-card admin-table-panel">
+                    <h4>📋 Últimos datos (Página: <span id="current-page-display">1</span>)</h4>
+                    <div class="table-wrap">
+                        <table class="table" id="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Vaca</th>
+                                    <th>TempAmb</th>
+                                    <th>TempObj</th>
+                                    <th>Cardíaco</th>
+                                    <th>Oxígeno</th>
+                                    <th>Lat</th>
+                                    <th>Lng</th>
+                                    <th>Fecha</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                    <div class="pagination" id="admin-pagination"></div>
+                </div>
+
+                <div class="admin-map-details-wrap">
+                    <div class="admin-card" style="margin-bottom:12px;">
+                        <h4>Mapa - Última ubicación</h4>
+                        <div id="map-admin"></div>
+                    </div>
+
+                    <div class="admin-card">
+                        <h4>Detalle de Registro</h4>
+                        <div id="detalle-vaca">Selecciona una fila para ver detalles.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script> 
+
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
