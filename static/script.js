@@ -134,9 +134,123 @@ function actualizarGraficas(dato) {
 }
 
 // Mapa de Monitoreo
-let map = L.map('map').setView([19.4326, -99.1332], 15);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '© OpenStreetMap', maxZoom: 19 }).addTo(map);
+let map = null;
 let marcadorVaca = null;
+let _mapInitialized = false;
+
+function initMapIfNeeded() {
+    // Si ya está inicializado solo forzamos invalidateSize
+    if (_mapInitialized) {
+        console.log('[map] ya inicializado — invalidando tamaño');
+        // esperar un poco por si hay transición/animación de la sección
+        setTimeout(() => {
+            try { map.invalidateSize(); } catch(e){ console.error('[map] invalidateSize error:', e); }
+        }, 300);
+        return;
+    }
+
+    // Verificar que el contenedor existe y tiene tamaño
+    const el = document.getElementById('map');
+    if (!el) {
+        console.error('[map] no existe <div id="map">');
+        return;
+    }
+    const rect = el.getBoundingClientRect();
+    console.log('[map] contenedor rect:', rect);
+
+    // Si el contenedor está oculto (height 0), esperamos a que esté visible
+    if (rect.width === 0 || rect.height === 0) {
+        console.log('[map] contenedor aún invisible (0 size). Esperando 300ms y reintentando...');
+        setTimeout(initMapIfNeeded, 300);
+        return;
+    }
+
+    // Crear mapa
+    console.log('[map] inicializando Leaflet...');
+    try {
+        map = L.map('map').setView([19.4326, -99.1332], 15);
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap',
+            maxZoom: 19
+        }).addTo(map);
+        marcadorVaca = null;
+        _mapInitialized = true;
+
+        // Un pequeño timeout para forzar el cálculo final
+        setTimeout(() => {
+            try { map.invalidateSize(); console.log('[map] invalidateSize ejecutado (init)'); }
+            catch(e){ console.error('[map] invalidateSize error (init):', e); }
+        }, 400);
+    } catch (err) {
+        console.error('[map] error al inicializar:', err);
+    }
+}
+
+// Hook a tu función showSection (llamar cuando se muestre la sección mapa)
+const originalShowSection = window.showSection; // si exists; si no, se ignora
+function showMapSectionHandler() {
+    // inicializa o recalcula el mapa cuando se entra a #mapa
+    initMapIfNeeded();
+    // también recalcular un poco después por si hay transiciones de CSS
+    setTimeout(() => {
+        if (map) {
+            try { map.invalidateSize(); console.log('[map] invalidateSize ejecutado (post-show)'); }
+            catch(e){ console.error('[map] invalidateSize error (post-show):', e); }
+        }
+    }, 700);
+}
+
+// Si tu showSection es la función local (la que mostraste), inyectamos la llamada:
+// BUSCAMOS la definición actual de showSection y la envolvemos si existe
+if (typeof showSection === 'function') {
+    const _orig = showSection;
+    window.showSection = function(id) {
+        _orig(id);
+        if (id === 'mapa') showMapSectionHandler();
+    };
+} else {
+    // si no existe showSection (teórica), escuchamos el hashchange
+    window.addEventListener('hashchange', () => {
+        if (location.hash === '#mapa') showMapSectionHandler();
+    });
+}
+
+// También si tus enlaces usan click listeners en lugar de hash, añade un listener general:
+document.querySelectorAll('a[href="#mapa"]').forEach(a => {
+    a.addEventListener('click', () => {
+        // Ejecutar después del cambio de sección
+        setTimeout(showMapSectionHandler, 250);
+    });
+});
+
+// Recalcular en resize (útil cuando cambian tamaño o rotas el móvil)
+window.addEventListener('resize', () => {
+    if (map) {
+        try { map.invalidateSize(); }
+        catch(e){ console.error('[map] invalidateSize error (resize):', e); }
+    }
+});
+
+// Si tu sidebar hace toggle y afecta el layout, invalida también allí
+const sidebar = document.getElementById('sidebar');
+if (sidebar) {
+    // observa cambios de atributos (p. ej. .active) para invalidar el mapa
+    const obs = new MutationObserver(() => {
+        if (map) { try { map.invalidateSize(); } catch(e){} }
+    });
+    obs.observe(sidebar, { attributes: true, attributeFilter: ['class'] });
+}
+
+// Si la página carga directamente en #mapa (deep link), inicializamos al DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    if (location.hash === '#mapa') {
+        // esperar a que showSection haya hecho su trabajo
+        setTimeout(initMapIfNeeded, 200);
+    } else {
+        // opcional: aún inicializamos el mapa en background si quieres que exista antes
+        // initMapIfNeeded();
+    }
+});
 
 function actualizarMapa(lat, lon, idVaca) {
     // Validar coordenadas
@@ -718,3 +832,4 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ... (Resto del código init global) ...
+
