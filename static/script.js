@@ -416,6 +416,7 @@ function onSelectCow(vacaId) {
     drawAdminCharts(datosVaca, vacaId);
 }
 
+
 // Gráficos Admin
 function drawAdminCharts(dataForCow, vacaId) {
     const labels = dataForCow.map(d => formatDate(d.fecha));
@@ -423,30 +424,45 @@ function drawAdminCharts(dataForCow, vacaId) {
     const hearts = dataForCow.map(d => d.ritmo_cardiaco);
     const title = vacaId ? `Histórico Vaca #${vacaId}` : 'Gráfica (selecciona vaca)';
 
-    // Destruir y recrear Temp Chart
+    // Temp Chart
     if (tempChartAdmin) tempChartAdmin.destroy();
     tempChartAdmin = new Chart(document.getElementById('adminTempChart').getContext('2d'), {
         type: 'line',
         data: { labels, datasets: [{ label: 'Temp objeto (°C)', data: temps, fill: false, borderColor: '#ff6384', tension: 0.3 }] },
         options: { 
             responsive: true, 
-            maintainAspectRatio: false, // <-- AÑADIDO
+            maintainAspectRatio: false,
             plugins: { title: { display: true, text: title } } 
         }
     });
 
-    // Destruir y recrear Heart Chart
+    // Heart Chart (corregido)
     if (heartChartAdmin) heartChartAdmin.destroy();
     heartChartAdmin = new Chart(document.getElementById('adminHeartChart').getContext('2d'), {
         type: 'line',
-        data: { labels, datasets: [{ label: 'Ritmo (BPM)', data: hearts, fill: false, borderColor: '#36a2eb', tension: 0.3 }] },
+        data: { 
+            labels, 
+            datasets: [{
+                label: 'Ritmo (BPM)',
+                data: hearts,
+                fill: false,
+                borderColor: '#36a2eb',
+                tension: 0.3
+            }] 
+        },
         options: { 
-            responsive: true, 
-            maintainAspectRatio: false, // <-- AÑADIDO
-            plugins: { title: { display: true, text: title } } 
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: { 
+                title: { display: true, text: title }
+            },
+            scales: {
+                y: { beginAtZero: false }
+            }
         }
     });
 }
+
 
 // Mapa Admin
 function initAdminMap() {
@@ -699,5 +715,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Iniciar con la sección 'inicio'
     showSection('inicio');
 });
+
 
 // ... (Resto del código init global) ...
