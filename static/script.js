@@ -87,53 +87,144 @@ function interpretarMovimiento(gyroX, gyroY, gyroZ) {
     }
 }
 
+// Plugin para dibujar líneas horizontales de referencia
+const referenceLine = {
+    id: 'referenceLine',
+    afterDraw(chart, args, options) {
+        const { ctx, chartArea: { top, bottom, left, right }, scales: { y } } = chart;
+
+        options.lines.forEach(line => {
+            const yValue = y.getPixelForValue(line.value);
+
+            ctx.save();
+            ctx.beginPath();
+            ctx.moveTo(left, yValue);
+            ctx.lineTo(right, yValue);
+            ctx.lineWidth = 2;
+            ctx.strokeStyle = line.color;
+            ctx.stroke();
+
+            ctx.fillStyle = line.color;
+            ctx.font = "12px Poppins";
+            ctx.fillText(line.label, left + 5, yValue - 5);
+            ctx.restore();
+        });
+    }
+};
+
 // Inicialización de gráficos de Monitoreo
 const ctxTemp = document.getElementById('tempChart').getContext('2d');
 const ctxHeart = document.getElementById('heartChart').getContext('2d');
 
+
 const tempChart = new Chart(ctxTemp, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'Temp. Objeto (°C)', data: [], borderWidth: 2, borderColor: '#ff6384', backgroundColor: 'rgba(255, 99, 132, 0.1)', tension: 0.3 }] },
+    plugins: [referenceLine],
+    data: { 
+        labels: [], 
+        datasets: [{
+            label: 'Temp. Objeto (°C)',
+            data: [],
+            borderWidth: 2,
+            borderColor: '#ff6384',
+            backgroundColor: 'rgba(255, 99, 132, 0.1)',
+            tension: 0.3,
+            pointBackgroundColor: []
+        }] 
+    },
     options: { 
-        responsive: true, 
-        maintainAspectRatio: false, // <-- AÑADIDO
-        scales: { y: { beginAtZero: false } } 
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: false } },
+        plugins: {
+            referenceLine: {
+                lines: [
+                    { value: 38, label: "Límite Alto (38°C)", color: "red" },
+                    { value: 34, label: "Temperatura Normal (34°C)", color: "green" },
+                    { value: 24, label: "Límite Bajo (24°C)", color: "red" },
+                ]
+            }
+        }
     }
 });
+
 const heartChart = new Chart(ctxHeart, {
     type: 'line',
-    data: { labels: [], datasets: [{ label: 'Ritmo Cardíaco (BPM)', data: [], borderWidth: 2, borderColor: '#36a2eb', backgroundColor: 'rgba(54, 162, 235, 0.1)', tension: 0.3 }] },
+    plugins: [referenceLine],
+    data: { 
+        labels: [], 
+        datasets: [{
+            label: 'Ritmo Cardíaco (BPM)',
+            data: [],
+            borderWidth: 2,
+            borderColor: '#36a2eb',
+            backgroundColor: 'rgba(54, 162, 235, 0.1)',
+            tension: 0.3,
+            pointBackgroundColor: []
+        }] 
+    },
     options: { 
-        responsive: true, 
-        maintainAspectRatio: false, // <-- AÑADIDO
-        scales: { y: { beginAtZero: false } } 
+        responsive: true,
+        maintainAspectRatio: false,
+        scales: { y: { beginAtZero: false } },
+        plugins: {
+            referenceLine: {
+                lines: [
+                    { value: 100, label: "Límite Alto (100 BPM)", color: "red" },
+                    { value: 85, label: "Rango Normal (85 BPM)", color: "green" },
+                    { value: 70, label: "Límite Bajo (70 BPM)", color: "red" },
+                ]
+            }
+        }
     }
 });
 
 function actualizarGraficas(dato) {
     const time = dato.fecha ? new Date(dato.fecha).toLocaleTimeString() : new Date().toLocaleTimeString();
-    
-    // Evita actualizar si el dato es nulo
+
     if (dato.temp_objeto === null || dato.ritmo_cardiaco === null) return;
-    
+
     const maxDataPoints = 15;
 
+    // --- TEMPERATURA ----
     tempChart.data.labels.push(time);
-    heartChart.data.labels.push(time);
     tempChart.data.datasets[0].data.push(dato.temp_objeto);
+
+    let colorTemp = "green";
+    if (dato.temp_objeto > 38) colorTemp = "red";
+    else if (dato.temp_objeto < 24) colorTemp = "red";
+
+    tempChart.data.datasets[0].pointBackgroundColor.push(colorTemp);
+
+
+    // --- RITMO CARDIACO ---
+    heartChart.data.labels.push(time);
     heartChart.data.datasets[0].data.push(dato.ritmo_cardiaco);
-    
+
+    let colorHeart = "green";
+    if (dato.ritmo_cardiaco > 100) colorHeart = "red";
+    else if (dato.ritmo_cardiaco < 70) colorHeart = "red";
+
+    heartChart.data.datasets[0].pointBackgroundColor.push(colorHeart);
+
+    // Mantener máximo 15 puntos
     if (tempChart.data.labels.length > maxDataPoints) {
         tempChart.data.labels.shift();
-        heartChart.data.labels.shift();
         tempChart.data.datasets[0].data.shift();
+        tempChart.data.datasets[0].pointBackgroundColor.shift();
+
+        heartChart.data.labels.shift();
         heartChart.data.datasets[0].data.shift();
+        heartChart.data.datasets[0].pointBackgroundColor.shift();
     }
-    tempChart.update('quiet'); // 'quiet' para mejor rendimiento
+
+    tempChart.update('quiet');
     heartChart.update('quiet');
 }
 
+
 // Mapa de Monitoreo
+// --- MAPA GPS (inicialización robusta y lazy) ---
 let map = null;
 let marcadorVaca = null;
 let _mapInitialized = false;
@@ -251,6 +342,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // initMapIfNeeded();
     }
 });
+
 
 function actualizarMapa(lat, lon, idVaca) {
     // Validar coordenadas
@@ -832,4 +924,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ... (Resto del código init global) ...
-
